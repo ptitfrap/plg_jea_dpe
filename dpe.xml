@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<install version="1.5" type="plugin" group="jea">
+<extension version="2.5" type="plugin" group="jea">
 	<name>JEA - DPE</name>
 	<author>Sylvain Philip</author>
 	<creationDate>Janvier 2011</creationDate>
@@ -9,14 +9,17 @@
 	<authorUrl>www.sphilip.com</authorUrl>
 	<version>1.0</version>
 	<description>Permet la prise en charge du DPE dans JEA.</description>
-	
+
+	<scriptfile>script.php</scriptfile>
+
 	<files>
 		<filename plugin="dpe">dpe.php</filename>
-		<folder>dpe</folder>
+		<folder>images</folder>
 	</files>
+
 	<languages>
 		<language tag="fr-FR">fr-FR.plg_jea_dpe.ini</language>
 	</languages>
-	
-	
-</install>
+
+
+</extension>
