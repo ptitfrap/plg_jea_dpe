@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="2.5" type="plugin" group="jea">
+<extension version="2.5" type="plugin" group="jea" method="upgrade">
 	<name>JEA - DPE</name>
 	<author>Sylvain Philip</author>
-	<creationDate>Janvier 2011</creationDate>
-	<copyright>Copyright (C) 2011 Sylvain Philip.</copyright>
+	<creationDate>april 2012</creationDate>
+	<copyright>Copyright (C) 2012 Sylvain Philip.</copyright>
 	<license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
 	<authorEmail>contact@sphilip.com</authorEmail>
 	<authorUrl>www.sphilip.com</authorUrl>
-	<version>1.0</version>
-	<description>Permet la prise en charge du DPE dans JEA.</description>
+	<version>2.0</version>
+	<description>«Diagnostic de Performance Energetique» (energy efficiency) report in property detail.</description>
 
 	<scriptfile>script.php</scriptfile>
 
 	<files>
 		<filename plugin="dpe">dpe.php</filename>
+		<folder>fonts</folder>
 		<folder>images</folder>
 	</files>
 
 	<languages>
+		<language tag="en-GB">en-GB.plg_jea_dpe.ini</language>
 		<language tag="fr-FR">fr-FR.plg_jea_dpe.ini</language>
 	</languages>
 
+	<!-- Updateserver definition -->
+	<updateservers>
+		<!-- Note: No spaces or linebreaks allowed between the server tags -->
+		<server type="extension" priority="1" name="JEA DPE Update Site">http://jea.sphilip.com/update/plg_jea_dpe.xml</server>
+	</updateservers>
 
 </extension>

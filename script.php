@@ -16,6 +16,7 @@
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
+jimport('joomla.filesystem.folder');
 /**
  * Install Script file of JEA component
  */
@@ -28,6 +29,9 @@ class plgjeadpeInstallerScript
      */
     function install($parent)
     {
+        if (!JFolder::exists(JPATH_ROOT . '/images/com_jea/dpe')) {
+            JFolder::create(JPATH_ROOT . '/images/com_jea/dpe');
+        }
     }
 
     /**
@@ -37,7 +41,9 @@ class plgjeadpeInstallerScript
      */
     function uninstall($parent)
     {
-
+        if (JFolder::exists(JPATH_ROOT . '/images/com_jea/dpe')) {
+            JFolder::delete(JPATH_ROOT . '/images/com_jea/dpe');
+        }
     }
 
     /**
@@ -60,11 +66,17 @@ class plgjeadpeInstallerScript
         $db = JFactory::getDbo();
         $db->setQuery('SHOW COLUMNS FROM #__jea_properties');
         $cols = $db->loadObjectList('Field');
-        if(!isset($cols['dpe_energie']) && !isset($cols['dpe_ges'])){
+        if(!isset($cols['dpe_energy']) && !isset($cols['dpe_ges'])){
             $query = 'ALTER TABLE `#__jea_properties` '
-            . "ADD `dpe_energie` ENUM('0','A','B','C','D','E','F','G') NOT NULL DEFAULT '0',"
-            . "ADD `dpe_ges`     ENUM('0','A','B','C','D','E','F','G') NOT NULL DEFAULT '0'";
+            . "ADD `dpe_energy` SMALLINT(4) NOT NULL DEFAULT '-1',"
+            . "ADD `dpe_ges` SMALLINT(4) NOT NULL DEFAULT '-1'";
 
+            $db->setQuery($query);
+            $db->query();
+        } elseif (isset($cols['dpe_energie']) && isset($cols['dpe_ges'])) {
+            $query = 'ALTER TABLE `#__jea_properties` '
+                   . "CHANGE `dpe_energie` `dpe_energy` SMALLINT(4) NOT NULL DEFAULT '-1',"
+                   . "CHANGE `dpe_ges` `dpe_ges` SMALLINT(4) NOT NULL DEFAULT '-1'";
             $db->setQuery($query);
             $db->query();
         }

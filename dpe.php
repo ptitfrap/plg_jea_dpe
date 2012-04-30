@@ -16,7 +16,6 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 
 jimport('joomla.event.plugin');
-// JPlugin::loadLanguage('plg_jea_dpe', JPATH_ADMINISTRATOR);
 
 class plgJeaDpe extends JPlugin
 {
@@ -40,10 +39,10 @@ class plgJeaDpe extends JPlugin
      * @param boolean $is_new
      * @return boolean
      */
-    function onBeforeSaveProperty($namespace, &$row, $is_new)
+    public function onBeforeSaveProperty($namespace, &$row, $is_new)
     {
-        $row->dpe_energie = JRequest::getVar( 'dpe_energie', '');
-        $row->dpe_ges     = JRequest::getVar( 'dpe_ges', '');
+        $row->dpe_energy = JRequest::getVar( 'dpe_energy', '');
+        $row->dpe_ges    = JRequest::getVar( 'dpe_ges', '');
         return true;
     }
 
@@ -53,36 +52,36 @@ class plgJeaDpe extends JPlugin
      * @param TableProperties $row
      * @return void
      */
-    function onBeforeEndPanels(&$row)
+    public function onBeforeEndPanels(&$row)
     {
-        $list = array();
-        $list[] = JHTML::_('select.option', '0', '-- ' . JText::_('SELECT_CLASS') . ' --' );
-        $list[] = JHTML::_('select.option', 'A', 'A' );
-        $list[] = JHTML::_('select.option', 'B', 'B' );
-        $list[] = JHTML::_('select.option', 'C', 'C' );
-        $list[] = JHTML::_('select.option', 'D', 'D' );
-        $list[] = JHTML::_('select.option', 'E', 'E' );
-        $list[] = JHTML::_('select.option', 'F', 'F' );
-        $list[] = JHTML::_('select.option', 'G', 'G' );
+        if ($row->dpe_energy === null) {
+            $row->dpe_energy = '-1';
+        }
 
-        $energie_list = JHTML::_('select.genericlist', $list, 'dpe_energie', 'class="inputbox" size="1" ', 'value', 'text', $row->dpe_energie );
-        $ges_list = JHTML::_('select.genericlist', $list, 'dpe_ges', 'class="inputbox" size="1" ', 'value', 'text', $row->dpe_ges );
+        if ($row->dpe_ges === null) {
+            $row->dpe_ges = '-1';
+        }
+
+        $energyLabel = JText::_('PLG_JEA_DPE_ENERGY_CONSUMPTION');
+        $energyDesc  = $energyLabel .'::'. JText::_('PLG_JEA_DPE_ENERGY_CONSUMPTION_DESC');
+        $gesLabel = JText::_('PLG_JEA_DPE_EMISSIONS_GES');
+        $gesDesc  = $gesLabel .'::'. JText::_('PLG_JEA_DPE_EMISSIONS_GES_DESC');
 
         $html ='
-         <table>
-          <tr>
-    		<td class="label" ><label for="energie_dpe">' . JText::_('CONSOMMATION_ENERGETIQUE') .' : </label></td>
-    		<td>'.$energie_list.'</td>
-    	  </tr>
-    	  
-    	  <tr>
-    		<td class="label"><label for="energie_dpe">' . JText::_('EMISSIONS_GES') .' : </label></td>
-    		<td>'.$ges_list.'</td>
-    	  </tr>
-			
-    	</table>';
+        <fieldset class="panelform">
+          <ul class="adminformlist">
+            <li>
+              <label for="dpe_energy" class="hasTip" title="' . $energyDesc.'">' . $energyLabel .' : </label>
+              <input type="text" name="dpe_energy" id="dpe_energy" value="'.$row->dpe_energy.'" class="numberbox" size="5" />
+            </li>
+            <li>
+              <label for="dpe_ges" class="hasTip" title="' . $gesDesc.'">' . $gesLabel .' : </label>
+              <input type="text" name="dpe_ges" id="dpe_ges" value="'.$row->dpe_ges.'" class="numberbox" size="5" />
+            </li>
+           </ul>
+         </fieldset>';
 
-        echo JHtml::_('sliders.panel', JText::_('DPE'), 'dpe-pane');
+        echo JHtml::_('sliders.panel', JText::_('PLG_JEA_DPE'), 'dpe-pane');
         echo $html;
     }
 
@@ -92,25 +91,179 @@ class plgJeaDpe extends JPlugin
      *
      * @param stdClass $row
      */
-    function onAfterShowDescription(&$row)
+    public function onAfterShowDescription(&$row)
     {
-        if (empty($row->dpe_energie) && empty($row->dpe_ges)) {
+        if ($row->dpe_energy < 0 && $row->dpe_ges < 0) {
             return;
         }
 
-        echo '<h3 class="jea_dpe">'. JText::_('DPE') .'</h3>'. PHP_EOL;
+        echo '<h3 class="jea_dpe">'. JText::_('PLG_JEA_DPE') .'</h3>'. PHP_EOL;
 
         echo '<div class="jea_dpe">'. PHP_EOL;
-         
-        if(!empty($row->dpe_energie)) {
-            echo JHTML::_('image.site', 'energie_'.$row->dpe_energie.'.gif', '/plugins/jea/dpe/images/');
+        echo getenv('GDFONTPATH');
+
+
+        if ($row->dpe_energy >= 0) {
+            try {
+                $img = $this->__generateEnergyImage($row->dpe_energy);
+                echo '<img src="' . $img . '" alt="'.JText::_('PLG_JEA_DPE_ENERGY_CONSUMPTION').'" style="margin-right: 50px;" />';
+            } catch (Exception $e) {
+                echo '<strong style="color:red">'. $e->getMessage() .'</strong>';
+            }
         }
-         
-        if(!empty($row->dpe_ges)) {
-            echo JHTML::_('image.site', 'ges_'.$row->dpe_ges.'.gif', '/plugins/jea/dpe/images/');
+
+        if ($row->dpe_ges >= 0) {
+            try {
+                $img = $this->__generateGESImage($row->dpe_ges);
+                echo '<img src="' . $img . '" alt="'.JText::_('PLG_JEA_DPE_EMISSIONS_GES').'" />';
+            } catch (Exception $e) {
+                echo '<strong style="color:red">'. $e->getMessage() .'</strong>';
+            }
         }
 
         echo '</div>'. PHP_EOL;
+    }
+
+    private function __generateEnergyImage($energy=0)
+    {
+        $lang = JFactory::getLanguage();
+        $tag = $lang->getTag();
+
+        $imagePath = JPATH_ROOT . '/images/com_jea/dpe/energy-'.$tag .'-'. $energy.'.png';
+        $uri = JFactory::getUri();
+        $imageURL = $uri->root(true) . '/images/com_jea/dpe/energy-'.$tag.'-'.$energy.'.png';
+
+        if (!file_exists($imagePath)) {
+            $levels = array(50,90,150,230,330,450);
+            $labels = array(
+                'measure'     => JText::_('PLG_JEA_DPE_ENERGY_MEASURE'),
+                'top-left'    => JText::_('PLG_JEA_DPE_ENERGY_TOP_LEFT_LABEL'),
+                'bottom-left' => JText::_('PLG_JEA_DPE_ENERGY_BOTTOM_LEFT_LABEL')
+            );
+            $this->__generateGDImage($energy, $imagePath, 'dpe-energy.png', $levels, $labels);
+        }
+
+        return $imageURL;
+    }
+
+    private function __generateGESImage($ges=0)
+    {
+        $lang = JFactory::getLanguage();
+        $tag = $lang->getTag();
+
+        $imagePath = JPATH_ROOT . '/images/com_jea/dpe/ges-'.$tag .'-'.$ges.'.png';
+        $uri = JFactory::getUri();
+        $imageURL = $uri->root(true) . '/images/com_jea/dpe/ges-'.$tag.'-'.$ges.'.png';
+
+        if (!file_exists($imagePath)) {
+            $levels = array(5,10,20,35,55,80);
+            $labels = array(
+                'measure'     => JText::_('PLG_JEA_DPE_GES_MEASURE'),
+                'top-left'    => JText::_('PLG_JEA_DPE_GES_TOP_LEFT_LABEL'),
+                'bottom-left' => JText::_('PLG_JEA_DPE_GES_BOTTOM_LEFT_LABEL')
+            );
+            $this->__generateGDImage($ges, $imagePath, 'dpe-ges.png', $levels, $labels);
+        }
+
+        return $imageURL;
+    }
+
+    private function __generateGDImage($dpeValue, $imagePath, $imageModel, $levels, $labels=array())
+    {
+        $currentLevel = 0;
+        $imgWidth = 300;
+        $imgHeiht = 260;
+        $fontFile = JPATH_ROOT.'/plugins/jea/dpe/fonts/DejaVuSans.ttf';
+        $fontBoldFile = JPATH_ROOT.'/plugins/jea/dpe/fonts/DejaVuSans-Bold.ttf';
+
+        foreach ($levels as $level => $value) {
+            if ($dpeValue <= $value) {
+                $currentLevel = $level;
+                break;
+            }
+        }
+
+        if ($currentLevel == 0 && $dpeValue > $levels[count($levels)-1]) {
+            $currentLevel = 6;
+        }
+
+        $img = @imagecreatetruecolor($imgWidth, $imgHeiht);
+
+        if (!$img) {
+            throw new Exception('Cannot create a GD image stream');
+        }
+
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $grey = imagecolorallocate($img, 200, 200, 200);
+        $grey2 = imagecolorallocate($img, 40, 40, 40);
+        imagefill($img, 0, 0, $white);
+
+        $arrowImg = @imagecreatefrompng(JPATH_ROOT.'/plugins/jea/dpe/images/arrow.png');
+        $imgModel   = @imagecreatefrompng(JPATH_ROOT.'/plugins/jea/dpe/images/'.$imageModel);
+
+        // Where the img model start from Y
+        $destY = ceil(($imgHeiht - imagesy($imgModel)) / 2);
+
+        $dpeY = $destY;
+
+        if ($currentLevel == 6) {
+            $dpeY += imagesy($imgModel) - 15;
+        } else {
+            $dpeY += $currentLevel * 33; // 30 px height per level + 3px margin
+            // Adjust now y between the levels limits
+            $start = 0;
+            $end = $levels[$currentLevel];
+            if (isset($levels[$currentLevel-1])) {
+                $start = $levels[$currentLevel-1] + 1;
+            }
+
+            $dpeY += floor(($dpeValue - $start) * 30 / ($end - $start));
+        }
+
+        // Draw horizontal line
+        imageline($img, 0, $dpeY, $imgWidth, $dpeY, $grey);
+
+        // Draw vertical line
+        imageline($img, 220, 0, 220, $imgHeiht, $grey2);
+
+        // Copy the image model
+        imagecopy($img, $imgModel, 0, $destY, 0, 0, imagesx($imgModel), imagesy($imgModel));
+        $destX = $imgWidth - imagesx($arrowImg);
+        $destY = $dpeY - (imagesy($arrowImg) / 2);
+        imagecopy($img, $arrowImg, $destX, $destY, 0, 0, imagesx($arrowImg), imagesy($arrowImg));
+
+        // Add the value
+        imagettftext($img, 11, 0 ,$destX+18 ,$destY+20 ,$white ,$fontBoldFile ,$dpeValue);
+
+        // Add the measure
+        if (isset($labels['measure'])) {
+            $box = imagettfbbox(7, 0, $fontFile, $labels['measure']);
+            $x = $box[4] - $box[0];
+            imagettftext($img, 7, 0, $imgWidth-$x ,$destY+41 ,$grey2 ,$fontFile , $labels['measure']);
+        }
+
+        // Add text to top left
+        if (isset($labels['top-left'])) {
+            imagettftext($img, 8, 0 ,0 ,9 ,$grey2 ,$fontFile , $labels['top-left']);
+        }
+
+        // Add text to top right 
+        imagettftext($img, 8, 0 ,230 ,9 ,$grey2 ,$fontFile , JText::_('PLG_JEA_DPE_TOP_RIGHT_LABEL'));
+
+        // Add text to bottom left
+        if (isset($labels['bottom-left'])) {
+            imagettftext($img, 8, 0 ,0 , $imgHeiht-3 ,$grey2 ,$fontFile , $labels['bottom-left']);
+        }
+
+        $ret = @imagepng($img, $imagePath);
+
+        imagedestroy($img);
+        imagedestroy($arrowImg);
+        imagedestroy($imgModel);
+
+        if (!$ret) {
+            throw new Exception('Cannot save image : '. $imagePath);
+        }
     }
 
 }
