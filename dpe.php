@@ -39,10 +39,11 @@ class plgJeaDpe extends JPlugin
      * @param boolean $is_new
      * @return boolean
      */
-    public function onBeforeSaveProperty($namespace, &$row, $is_new)
+    public function onBeforeSaveProperty($namespace, $row, $is_new)
     {
-        $row->dpe_energy = JRequest::getVar( 'dpe_energy', '');
-        $row->dpe_ges    = JRequest::getVar( 'dpe_ges', '');
+        $input = JFactory::getApplication()->input;
+        $row->dpe_energy = $input->getFloat('dpe_energy', -1.0);
+        $row->dpe_ges    = $input->getFloat( 'dpe_ges', -1.0);
         return true;
     }
 
