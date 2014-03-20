@@ -53,7 +53,9 @@ class plgjeadpeInstallerScript
      */
     function update($parent)
     {
-
+        if (!JFolder::exists(JPATH_ROOT . '/images/com_jea/dpe')) {
+            JFolder::create(JPATH_ROOT . '/images/com_jea/dpe');
+        }
     }
 
     /**
