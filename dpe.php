@@ -42,8 +42,11 @@ class plgJeaDpe extends JPlugin
     public function onBeforeSaveProperty($namespace, $row, $is_new)
     {
         $input = JFactory::getApplication()->input;
-        $row->dpe_energy = $input->getFloat('dpe_energy', -1.0);
-        $row->dpe_ges    = $input->getFloat( 'dpe_ges', -1.0);
+        if ($input->get('dpe_energy') || $input->get('dpe_ges')) {
+            $row->dpe_energy = $input->getFloat('dpe_energy', -1.0);
+            $row->dpe_ges    = $input->getFloat( 'dpe_ges', -1.0);
+        }
+
         return true;
     }
 
