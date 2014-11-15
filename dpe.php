@@ -128,6 +128,44 @@ class plgJeaDpe extends JPlugin
         echo '</div>'. PHP_EOL;
     }
 
+    
+    /**
+     * getDpeImage method
+     *
+     * @param stdClass $row
+     *
+     * @return array(dpe_energy Image Url , dpe_ges Image Url)
+     */
+    public function getDpeImage(&$row)
+    {
+    	if ($row->dpe_energy < 0 ) {
+    		$row->dpe_energy = 0;
+    	}
+    	if ($row->dpe_ges < 0 ) {
+    		$row->dpe_ges = 0;
+    	}
+    	if ($row->dpe_energy >= 0) {
+    		try {
+    			$img = $this->__generateEnergyImage($row->dpe_energy);
+    			$energy = $img;
+    		} catch (Exception $e) {
+    			$energy = '';
+    		}
+    	}
+    	 
+    	if ($row->dpe_ges >= 0) {
+    		try {
+    			$img = $this->__generateGESImage($row->dpe_ges);
+    			$ges = $img;
+    		} catch (Exception $e) {
+    			$ges = '';
+    		}
+    	}
+    	 
+    	return array($energy,$ges);
+    	 
+    }
+    
     private function __generateEnergyImage($energy=0)
     {
         $lang = JFactory::getLanguage();
